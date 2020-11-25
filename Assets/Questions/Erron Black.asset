@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Erron Black
   m_EditorClassIdentifier: 
   image: {fileID: 21300000, guid: ed10b0bcb00cb694fab9fbc8980eb230, type: 3}
-  answer:
+  answers:
   - Erron Black
   - Jax
   - Terminator

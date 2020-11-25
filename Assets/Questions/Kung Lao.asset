@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Kung Lao
   m_EditorClassIdentifier: 
   image: {fileID: 21300000, guid: c2250874cf469b04c8ec6a6a0a4d39d4, type: 3}
-  answer:
+  answers:
   - Jacqui Briggs
   - Shao Kahn
   - Kung Lao

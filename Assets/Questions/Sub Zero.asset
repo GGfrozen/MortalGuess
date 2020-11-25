@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sub Zero
   m_EditorClassIdentifier: 
   image: {fileID: 21300000, guid: a62084d97285a7e41b51c4a9cf6d9137, type: 3}
-  answer:
+  answers:
   - Scorpion
   - Sub Zero
   - Baraka

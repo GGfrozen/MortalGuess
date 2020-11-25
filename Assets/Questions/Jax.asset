@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Jax
   m_EditorClassIdentifier: 
   image: {fileID: 21300000, guid: 90cae7b460b1ce447ae1aa06cc7faf37, type: 3}
-  answer:
+  answers:
   - Scorpion
   - Jax
   - Liu Kang

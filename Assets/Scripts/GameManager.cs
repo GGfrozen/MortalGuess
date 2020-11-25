@@ -1,131 +1,102 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.IO.MemoryMappedFiles;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
+    public static event Action<int> OnTrueAnswerChanged;
+    public static event Action<int> OnFalseAnswerChanged;
+    public static event Action<int> OnHealthChanged;
+    public static event Action<int, int, string> OnGameEnded;
+    
     [Header("Question")]
-    [SerializeField] Image questionImage;
-    [SerializeField] Button[] buttons;
-    [SerializeField] Button help;
+    [SerializeField] private Image questionImage;
+    [SerializeField] private Button[] answersButtons;
 
     [Header("Data")]
-    public List<QuestionData> allQuestions;
+    [SerializeField] private List<QuestionData> allQuestions;
 
-    [Header("Score")]
-    [SerializeField] Text trueScore;
-    [SerializeField] Text falseScore;
-    [SerializeField] Image[] lives;
+    [SerializeField] private CanvasGroup finalPanel;
+    
+    [SerializeField] private int healthCount = 3;
 
-    QuestionData currentQuestion;
-    SceneLoader sceneLoader;
+    private int _trueAnswerCount;
+    private int _falseAnswerCount;
 
-    public int trueAnswer;
-    public int falseAnswer;
-
-    private int health = 3;
-    private int hintCount;
-
-    private void Start()
+    private const string LoseMessage = "YOU LOSE!";
+    private const string WinMessage = "YOU WIN";
+    public Button[] AnswersButtons => answersButtons;
+    public QuestionData CurrentQuestion { get; private set; }
+    private int TrueAnswerCount
     {
-        sceneLoader = FindObjectOfType<SceneLoader>();
+        get => _trueAnswerCount;
+        set
+        {
+            _trueAnswerCount = value;
+            OnTrueAnswerChanged?.Invoke(_trueAnswerCount);
+        }
+    }
+
+    private int FalseAnswerCount
+    {
+        get => _falseAnswerCount;
+        set
+        {
+            _falseAnswerCount = value;
+            OnFalseAnswerChanged?.Invoke(_falseAnswerCount);
+        }
+    }
+
+    private void OnEnable()
+    {
         SetQuestion();
-        DontDestroyOnLoad(this);
-        hintCount = 2;
     }
-
-    public void CheckAnswer(int answer)
-    {
-
-        if (answer == currentQuestion.rightAnswer)
-        {
-            trueAnswer++;
-        }
-        else if (answer != currentQuestion.rightAnswer)
-        {
-            falseAnswer++;
-            health--;
-            if (health == 0)
-            {
-                sceneLoader.LoadLastScene();
-            }
-        }
-
-        allQuestions.Remove(currentQuestion);
-        SetQuestion();
-        CheckLives();
-        RestartButtons();
-
-        trueScore.text = "RIGHT : " + trueAnswer;
-        falseScore.text = "FALSE : " + falseAnswer;
-
-    }
-    public void HelpButton()
-    {
-        if (hintCount != 0)
-        {
-            hintCount--;
-            int counter = 0;
-
-            for (int i = 0; i < buttons.Length; i++)
-            {
-                if (counter == 2)
-                {
-                    break;
-                }
-                Button button = buttons[i];
-                if (i != currentQuestion.rightAnswer)
-                {
-                    button.interactable = false;
-                    counter++;
-
-
-                }
-
-            }
-        }
-        
-    }
-    private void RestartButtons()
-    {
-        for (int i = 0; i < buttons.Length; i++)
-        {
-            Button button = buttons[i];
-
-            button.interactable = true;
-
-
-
-        }
-    }
-
     private void SetQuestion()
     {
         if (allQuestions.Count <= 0)
         {
-            sceneLoader.LoadNextLevel();
+            finalPanel.gameObject.SetActive(true);
+            OnGameEnded?.Invoke(_trueAnswerCount,_falseAnswerCount,WinMessage);
         }
         else
         {
-            int questionIndex = Random.Range(0, allQuestions.Count - 1);
-            currentQuestion = allQuestions[questionIndex];
-            questionImage.sprite = currentQuestion.image;
-            for (int i = 0; i < buttons.Length; i++)
+            var questionIndex = Random.Range(0, allQuestions.Count - 1);
+            CurrentQuestion= allQuestions[questionIndex];
+            questionImage.sprite = CurrentQuestion.Image;
+            for (var i = 0; i < answersButtons.Length; i++)
             {
-                buttons[i].GetComponentInChildren<Text>().text = currentQuestion.answer[i].ToUpper();
+                answersButtons[i].GetComponentInChildren<Text>().text = CurrentQuestion.Answers[i].ToUpper();
             }
         }
     }
-    private void CheckLives()
+    public void CheckAnswer(int answerIndex)
     {
-        if (health < lives.Length)
+        if (answerIndex == CurrentQuestion.RightAnswer)
         {
-            lives[health].enabled = false;
+            TrueAnswerCount++;
         }
-
+        else if (answerIndex != CurrentQuestion.RightAnswer)
+        {
+            FalseAnswerCount++;
+            healthCount--;
+            if (healthCount == 0)
+            {
+                finalPanel.gameObject.SetActive(true);
+                OnGameEnded?.Invoke(_trueAnswerCount, _falseAnswerCount, LoseMessage);
+            }
+            OnHealthChanged?.Invoke(healthCount);
+        }
+        allQuestions.Remove(CurrentQuestion);
+        SetQuestion();
+        RestartButtons();
     }
-
-
+    private void RestartButtons()
+    {
+        foreach (var button in answersButtons)
+        {
+            button.interactable = true;
+        }
+    }
 }

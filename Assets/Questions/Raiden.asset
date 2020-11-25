@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Raiden
   m_EditorClassIdentifier: 
   image: {fileID: 21300000, guid: f3e846ac1bdfcaa4d82a216fb48dec6f, type: 3}
-  answer:
+  answers:
   - Shang Tsung
   - Kotal Kahn
   - Kollector
